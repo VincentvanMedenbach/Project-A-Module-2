@@ -5,15 +5,11 @@ from pprint import pprint
 from functools import partial
 from cfg import Config
 import tweepy
-
-
 import psycopg2
 
 root = Tk()
 nameVariable = StringVar()
 passwordVariable = StringVar()
-maxLength = 139
-
 
 
 # root.geometry('200x450')
@@ -23,13 +19,12 @@ class Window(Frame):
         Frame.__init__(self, master)
         self.master = master
 
-print(Config.consumer_key)
-
 
 userNameLabel = Label(root, text="Naam", font=('Comic Sans MS', 12))
 userNameLabel.pack()
 userName = Entry(root, textvariable=nameVariable, relief=RAISED, font=('Comic Sans MS', 12))  # Creates name Input
 userName.pack()
+
 passwordLabel = Label(root, text="Wachtwoord", font=('Comic Sans MS', 12))
 passwordLabel.pack()
 password = Entry(root, textvariable=passwordVariable, relief=RAISED,
@@ -37,6 +32,7 @@ password = Entry(root, textvariable=passwordVariable, relief=RAISED,
 
 frame_container = Frame(root)
 frame_container.pack()
+
 canvas_container = Canvas(frame_container, height=100)
 frame2 = Frame(canvas_container)
 canvas_container.create_window((0, 0), window=frame2, anchor='nw')
@@ -61,20 +57,12 @@ def submit():
                                       database="ns")
 
         cursor = connection.cursor()
-        # Print PostgreSQL Connection properties
-        # print(connection.get_dsn_parameters(), "\n")
-
-        # Print PostgreSQL version
-        cursor.execute("SELECT version();")
-        record = cursor.fetchone()
-        # print("You are connected to - ", record, "\n")
 
     except (Exception, psycopg2.Error) as error:
         print("Error while connecting to PostgreSQL", error)
 
     cursor.execute("SELECT * FROM users WHERE email = %s AND password = %s",
                    (nameVariable.get(), passwordVariable.get()))
-    # print(connection.commit())
     items = cursor.fetchall()
     if (len(items)):
         passwordLabel.pack_forget()
@@ -89,7 +77,6 @@ def submit():
             print(item)
             submit.button = Button(frame2, text=item[1], command=partial(popUp, item))
             submit.button.pack()
-            # messages.insert(item[0], item[1])
         scrollbar.pack(side=RIGHT, fill=Y)
 
 
@@ -113,7 +100,8 @@ def popUp(item):
     datumContent = tk.Label(popUp.topLevel, text=f"{item[2]:%a, %b %d %Y}")
     datumContent.grid(row=3, column=1)
 
-    approve = tk.Button(popUp.topLevel, text="Approve", background="green", command=partial(checkMessage, item, "Approve"))
+    approve = tk.Button(popUp.topLevel, text="Approve", background="green",
+                        command=partial(checkMessage, item, "Approve"))
     approve.grid(row=4, column=0)
 
     reject = tk.Button(popUp.topLevel, text="Reject", background="red", command=partial(checkMessage, item, "Reject"))
@@ -128,7 +116,8 @@ def checkMessage(item, status):
     mystring = StringVar()
     messageLabel = ttk.Label(checkMessage.statusPopup, text="bericht")
     messageLabel.grid(row=1, column=0)
-    checkMessage.messageItem = Text(checkMessage.statusPopup, relief=RAISED, font=('Comic Sans MS', 12), width=33, height=4)
+    checkMessage.messageItem = Text(checkMessage.statusPopup, relief=RAISED, font=('Comic Sans MS', 12), width=33,
+                                    height=4)
     checkMessage.messageItem.grid(row=1, column=1)
     print(checkMessage.messageItem.get("1.0", "end-1c"))
     submit = tk.Button(checkMessage.statusPopup, text="Submit", background="blue",
@@ -137,7 +126,6 @@ def checkMessage(item, status):
 
 
 def submitMessage(item, status, message):
-
     try:
         connection = psycopg2.connect(user="postgres",
                                       password="root",
@@ -166,8 +154,6 @@ def submitMessage(item, status, message):
     print(message.get("1.0", "end-1c"))
     api.update_status(item[1])
 
-
-
     frame2.destroy()
 
     newFrame = Frame(canvas_container)
@@ -175,13 +161,9 @@ def submitMessage(item, status, message):
 
     newFrame.pack()
 
-
     cursor.execute(
         "SELECT * FROM messages WHERE status IS NULL AND messages.id NOT IN(SELECT messagesId FROM moderation_status)",
         (nameVariable.get(), passwordVariable.get()))
-
-
-
 
     for item in cursor.fetchall():
         print(item)
@@ -190,11 +172,9 @@ def submitMessage(item, status, message):
         # messages.insert(item[0], item[1])
     scrollbar.pack(side=RIGHT, fill=Y)
 
-
     connection.commit()
     popUp.topLevel.destroy()
     checkMessage.statusPopup.destroy()
-
 
 
 loginButton = Button(root, text="submit", command=submit, font=('Comic Sans MS', 12), fg="green", background="pink")
