@@ -147,12 +147,12 @@ def submitMessage(item, status, message):
 
     cursor.execute("INSERT INTO moderation_status (messagesId, userEmail, status, message) VALUES (%s, %s, %s, %s)",
                    (item[0], nameVariable.get(), status, message.get("1.0", "end-1c")))
-    auth = tweepy.OAuthHandler(Config.consumer_key, Config.consumer_secret)
-    auth.set_access_token(Config.access_token, Config.access_token_secret)
-    api = tweepy.API(auth)
-    print("test")
-    print(message.get("1.0", "end-1c"))
-    api.update_status(item[1])
+    if status == "Approve":
+        auth = tweepy.OAuthHandler(Config.consumer_key, Config.consumer_secret)
+        auth.set_access_token(Config.access_token, Config.access_token_secret)
+        api = tweepy.API(auth)
+        api.update_status(item[1])
+
 
     frame2.destroy()
 
